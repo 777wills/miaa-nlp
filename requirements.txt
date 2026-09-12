@@ -1,0 +1,11 @@
+torch>=2.1
+lightning>=2.2
+torchmetrics>=1.0
+tensorboard
+datasets
+spacy>=3.7
+scikit-learn
+pandas
+numpy
+matplotlib
+gradio>=4.0
