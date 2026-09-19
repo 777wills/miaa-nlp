@@ -18,6 +18,8 @@ miaa-nlp/
 ├── requirements.txt   # dependencias comunes a todos los talleres
 ├── Taller-s1/         # semana 1
 │   └── clasificacion_resenas_es_lstm_gru.ipynb
+├── Taller-s2/         # semana 2
+│   └── clasificacion_resenas_es_transformers.ipynb
 └── README.md
 ```
 
@@ -43,6 +45,41 @@ cero y redes recurrentes con vectores preentrenados.
 - **Salidas:** al ejecutarlo se generan `csv_logs/` y `tb_logs/` con las métricas de
   entrenamiento, y `artefactos_resenas/` con los pesos del modelo final y sus metadatos.
 
+### Taller-s2 — Clasificación de reseñas en español con un encoder Transformer
+
+Mismo problema ordinal que la semana 1, abordado implementando desde cero el codificador
+del Transformer —codificación posicional sinusoidal, atención multi-cabeza y bloque con
+conexiones residuales— y comparándolo contra modelos sin atención.
+
+- **Cuaderno:** [Taller-s2/clasificacion_resenas_es_transformers.ipynb](Taller-s2/clasificacion_resenas_es_transformers.ipynb),
+  con diecisiete entrenamientos, ablaciones de las piezas del modelo, curva de datos,
+  análisis de los mapas de atención y demo interactiva.
+- **Corpus:** el mismo `SetFit/amazon_reviews_multi_es`, con un tokenizador subword BPE de
+  16.000 entradas entrenado sobre las propias reseñas y corte de secuencia en 86 tokens.
+- **Comparación:** modelo lineal sobre TF-IDF, dos perceptrones multicapa, una GRU y nueve
+  variantes del Transformer, más dos programaciones alternativas del ritmo de aprendizaje y
+  una versión entrenada con una pérdida sensible al orden de las clases. Todos comparten
+  optimizador, ritmo de aprendizaje, recorte de gradiente, criterio de parada, semilla y
+  orden de los lotes.
+- **Aporte de la atención:** en lugar de comparar el Transformer contra un modelo sin
+  bloques, que no aísla la atención porque al quitar el bloque desaparecen todas sus piezas
+  a la vez, el cuaderno monta una escalera de cuatro controles con el mismo número de
+  parámetros. Mezclar entre posiciones recupera lo que pierde un bloque que transforma cada
+  posición por separado, y que esa mezcla se **aprenda** del contenido añade **+0,0120 de
+  kappa** (0,7456 frente a 0,7336 con pesos uniformes), una diferencia que queda por debajo
+  del margen de error.
+- **Resultado:** con 50.000 reseñas ningún Transformer supera a la bolsa de palabras —0,7503
+  de kappa frente a 0,7805 del perceptrón sobre TF-IDF y 0,7509 de la regresión logística,
+  que se entrena en menos de diez segundos de CPU—, pero al cuadruplicar el corpus el
+  Transformer llega a 0,7803 y la alcanza. El modelo seleccionado es la GRU entrenada con el
+  corpus completo, que sobre la partición de prueba obtiene 0,5347 de F1-macro, 0,5643 de
+  MAE en estrellas y 0,7986 de kappa cuadrático ponderado, con el 92,0% de las predicciones
+  a menos de una estrella del valor real. El Transformer entrenado con el mismo corpus queda
+  por delante en prueba en las cuatro métricas (0,8008 de kappa), aunque todas las
+  diferencias son menores que el margen de error.
+- **Salidas:** `csv_logs/` y `tb_logs/` con las métricas de entrenamiento, y
+  `artefactos_transformer/` con los pesos del modelo final, el tokenizador y sus metadatos.
+
 ## Datos
 
 Los corpus **no se guardan en el repositorio**. Los cuadernos los descargan del Hub de
@@ -58,11 +95,11 @@ python -m spacy download es_core_news_lg
 ```
 
 Los cuadernos detectan si se ejecutan en Google Colab e instalan las dependencias por su
-cuenta. Funcionan en CPU, aunque el entrenamiento de las redes es notablemente más rápido
-con GPU.
+cuenta. Funcionan en CPU.
 
 ## Ejecución
 
 Abrir la carpeta del taller correspondiente y ejecutar las celdas en orden. El cuaderno de
 la semana 1 entrena siete modelos, evalúa el mejor sobre la partición de prueba y levanta
-una demo en Gradio al final.
+una demo en Gradio al final. El de la semana 2 entrena diecisiete modelos y sigue el mismo
+cierre;

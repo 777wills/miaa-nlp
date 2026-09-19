@@ -3,6 +3,8 @@ lightning>=2.2
 torchmetrics>=1.0
 tensorboard
 datasets
+transformers>=4.40
+tokenizers>=0.19
 spacy>=3.7
 scikit-learn
 pandas
