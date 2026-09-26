@@ -20,6 +20,8 @@ miaa-nlp/
 │   └── clasificacion_resenas_es_lstm_gru.ipynb
 ├── Taller-s2/         # semana 2
 │   └── clasificacion_resenas_es_transformers.ipynb
+├── Taller-s3/         # semana 3
+│   └── Proyecto_bert_resenas_amazon_colab_Experimentos.ipynb
 └── README.md
 ```
 
@@ -80,6 +82,42 @@ conexiones residuales— y comparándolo contra modelos sin atención.
 - **Salidas:** `csv_logs/` y `tb_logs/` con las métricas de entrenamiento, y
   `artefactos_transformer/` con los pesos del modelo final, el tokenizador y sus metadatos.
 
+### Taller-s3 — Clasificación de reseñas en español con variantes de BERT
+
+Mismo problema de 1 a 5 estrellas, abordado ahora con _fine-tuning_ completo de modelos BERT
+preentrenados. El experimento es controlado: se mantienen fijos los datos, las particiones y
+los hiperparámetros, y solo cambia el checkpoint.
+
+- **Cuaderno:** [Taller-s3/Proyecto_bert_resenas_amazon_colab_Experimentos.ipynb](Taller-s3/Proyecto_bert_resenas_amazon_colab_Experimentos.ipynb),
+  con la depuración del corpus, un EDA breve, el análisis de longitud en tokens, los tres
+  experimentos y la comparación de métricas y patrones de error.
+- **Corpus:** el mismo `SetFit/amazon_reviews_multi_es`. Se eliminan textos vacíos y
+  duplicados, se retiran del entrenamiento las reseñas que aparecen en validación o prueba
+  y se toma una muestra balanceada de 50.000 reseñas (10.000 por clase). Validación y prueba
+  conservan las particiones originales.
+- **Modelos:** BETO Cased (`dccuchile/bert-base-spanish-wwm-cased`), BETO Uncased
+  (`dccuchile/bert-base-spanish-wwm-uncased`) y Multilingual BERT
+  (`bert-base-multilingual-cased`), todos con `Trainer` de Hugging Face, 128 tokens como
+  máximo, 2 épocas, tasa de aprendizaje de `2e-5`, _weight decay_ de 0,01, lotes de 8 y
+  selección del mejor checkpoint por _accuracy_ en validación. Con ese corte se trunca menos
+  del 3% de las reseñas en los tres tokenizadores.
+- **Resultado sobre la partición de prueba:**
+
+  | Modelo            | Accuracy | MAE (estrellas) | Tiempo de entrenamiento |
+  | ----------------- | -------- | --------------- | ----------------------- |
+  | BETO Cased        | 0,5829   | 0,4794          | 13,73 min               |
+  | BETO Uncased      | 0,5757   | 0,4874          | 13,92 min               |
+  | Multilingual BERT | 0,5667   | 0,5102          | 17,13 min               |
+
+  BETO Cased es el mejor en las tres medidas y deja el 94,9% de las predicciones a una
+  estrella o menos del valor real. La ventaja sobre BETO Uncased es pequeña; el modelo
+  multilingüe queda por detrás y es el más lento, porque su tokenizador parte las reseñas en
+  más piezas (42 tokens de media frente a 37).
+
+- **Salidas:** `bert_amazon_experimento/` (en `/content/` si se ejecuta en Colab) con las
+  métricas en JSON, las predicciones sobre prueba en CSV y la matriz de confusión de cada
+  modelo. Los checkpoints intermedios se borran al terminar cada entrenamiento.
+
 ## Datos
 
 Los corpus **no se guardan en el repositorio**. Los cuadernos los descargan del Hub de
@@ -94,12 +132,19 @@ pip install -r requirements.txt
 python -m spacy download es_core_news_lg
 ```
 
-Los cuadernos detectan si se ejecutan en Google Colab e instalan las dependencias por su
-cuenta. Funcionan en CPU.
+Los cuadernos de las semanas 1 y 2 detectan si se ejecutan en Google Colab e instalan las
+dependencias por su cuenta. Funcionan en CPU.
+
+El cuaderno de la semana 3 está pensado para Google Colab con GPU (se ejecutó en una L4). Su
+primera celda instala versiones fijas de `transformers` (4.57.1), `datasets` (4.3.0),
+`accelerate`, `huggingface-hub` y `tokenizers`, y exige PyTorch 2.6 o superior; después hay
+que reiniciar la sesión una vez. En CPU funciona, pero el entrenamiento de los tres modelos
+tarda mucho más.
 
 ## Ejecución
 
 Abrir la carpeta del taller correspondiente y ejecutar las celdas en orden. El cuaderno de
 la semana 1 entrena siete modelos, evalúa el mejor sobre la partición de prueba y levanta
 una demo en Gradio al final. El de la semana 2 entrena diecisiete modelos y sigue el mismo
-cierre;
+cierre. El de la semana 3 afina los tres modelos BERT uno tras otro, evalúa cada uno sobre la
+partición de prueba y termina con la tabla comparativa y el análisis de errores.
