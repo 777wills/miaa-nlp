@@ -1,0 +1,53 @@
+id,pregunta,articulos_gold,tema,en_dominio
+1,¿Desde qué edad puedo sacar el pase para manejar un carro particular?,19,licencias,1
+2,¿Qué papeles y exámenes me piden para sacar la licencia de conducción por primera vez?,19,licencias,1
+3,¿Cuánto tiempo dura vigente la licencia de conducción de un carro particular?,22,licencias,1
+4,"Vengo de vacaciones con licencia de otro país, ¿puedo manejar en Colombia con ella?",25,licencias,1
+5,¿En qué casos me pueden suspender o cancelar la licencia de conducción?,26,licencias,1
+6,"Quiero pasar de pase de carro a pase de camión, ¿qué tengo que hacer para cambiar de categoría?",24,licencias,1
+7,¿Me pueden renovar el pase si tengo multas de tránsito sin pagar?,23,licencias,1
+8,¿Es obligatorio tener el SOAT al día para poder andar en el carro?,42,documentos,1
+9,¿Me hacen algún descuento en el SOAT si no he tenido accidentes?,42,documentos,1
+10,"Compré un carro particular nuevo, ¿cuándo le toca la primera revisión técnico-mecánica?",52,documentos,1
+11,¿Cada cuánto tienen que pasar la revisión técnico-mecánica los taxis y los buses?,51,documentos,1
+12,"Si un agente me para, ¿tengo que mostrarle la licencia y el SOAT en físico o basta con que los consulte en el sistema?",17,documentos,1
+13,¿Qué herramientas y elementos es obligatorio llevar en el carro como equipo de carretera?,30,documentos,1
+14,"Me robaron una de las placas del carro, ¿qué pasa con el número?",45,documentos,1
+15,"Compré un carro usado, ¿en cuánto tiempo tengo que hacer el traspaso ante tránsito?",47,documentos,1
+16,¿Un niño de 8 años puede ir sentado en el puesto de adelante?,82,comportamiento,1
+17,¿Quiénes están obligados a usar el cinturón de seguridad?,82,comportamiento,1
+18,¿Cuál es la velocidad máxima permitida dentro de la ciudad?,106,comportamiento,1
+19,¿Hasta qué velocidad puedo ir por una carretera nacional?,107,comportamiento,1
+20,"Si voy a 70 kilómetros por hora, ¿qué distancia debo dejar con el carro de adelante?",108,comportamiento,1
+21,¿En qué lugares está prohibido parquear el carro?,76,comportamiento,1
+22,¿Puedo girar a la derecha cuando el semáforo está en rojo?,118,comportamiento,1
+23,¿Se puede tanquear el carro con el motor prendido?,85,comportamiento,1
+24,¿Qué tengo que hacer si viene detrás una ambulancia con la sirena prendida?,64,comportamiento,1
+25,¿A qué distancia debo pasar a un ciclista cuando lo voy a adelantar?,60,comportamiento,1
+26,"En una glorieta, ¿quién tiene la prelación, el que está adentro o el que va a entrar?",70,comportamiento,1
+27,¿Desde qué hora es obligatorio prender las luces del carro?,86,comportamiento,1
+28,¿Me pueden multar por hablar por celular mientras manejo?,131,comportamiento,1
+29,¿El parrillero de la moto también tiene que usar casco?,96;94,motos_bicis_peatones,1
+30,¿Las motos tienen que andar con las luces prendidas de día?,96,motos_bicis_peatones,1
+31,¿Las motos pueden andar por la ciclorruta?,68,motos_bicis_peatones,1
+32,"Si salgo en bicicleta de noche, ¿qué luces debo llevar?",95,motos_bicis_peatones,1
+33,¿Qué cosas tienen prohibidas los peatones y de cuánto es la multa?,58,motos_bicis_peatones,1
+34,¿A qué velocidad máxima pueden ir las patinetas y bicicletas eléctricas?,106,motos_bicis_peatones,1
+35,¿De cuánto es la multa por pasarme un semáforo en rojo?,131,sanciones,1
+36,¿Cuánto me cobran de multa por parquear en un sitio prohibido?,131,sanciones,1
+37,"Si acepto el comparendo, ¿qué descuento me dan si pago rápido y hago el curso?",136,sanciones,1
+38,¿Después de cuánto tiempo prescribe una multa de tránsito?,159,sanciones,1
+39,¿Qué me pasa si me cogen manejando borracho?,152;26,sanciones,1
+40,¿Qué tipos de sanciones me pueden poner por una infracción de tránsito?,122,sanciones,1
+41,"Tuve un choque simple y solo hubo daños en los carros, ¿qué debemos hacer?",143;143A,sanciones,1
+42,¿Qué significa que me inmovilicen el carro y a dónde se lo llevan?,125,sanciones,1
+43,¿Qué es exactamente un comparendo?,2,sanciones,1
+44,¿Las fotomultas son válidas como prueba de una infracción?,129,sanciones,1
+45,¿Qué es el RUNT y qué información guarda?,8,sanciones,1
+46,¿Para qué sirve el SIMIT?,10,sanciones,1
+47,¿Cuánto cuesta el impuesto vehicular en Cali este año?,,fuera_de_dominio,0
+48,¿Cuál es el precio del galón de gasolina hoy en Colombia?,,fuera_de_dominio,0
+49,¿Qué requisitos pide Uber para registrarme como conductor?,,fuera_de_dominio,0
+50,¿Cuál es el número de teléfono de la Secretaría de Movilidad de Medellín?,,fuera_de_dominio,0
+51,¿Cómo se prepara un sancocho de gallina?,,fuera_de_dominio,0
+52,¿Quién ganó el mundial de fútbol de 2022?,,fuera_de_dominio,0
