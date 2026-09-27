@@ -14,7 +14,9 @@ corresponden.
 
 ```
 miaa-nlp/
-├── data/              # archivos de apoyo locales (los corpus grandes no se versionan)
+├── data/              # archivos de apoyo pequeños (los corpus grandes no se versionan)
+│   ├── ley_769_2002_articulos.jsonl        # Código de Tránsito limpio (semana 5)
+│   └── preguntas_evaluacion_transito.csv   # set de evaluación del RAG (semana 5)
 ├── requirements.txt   # dependencias comunes a todos los talleres
 ├── Taller-s1/         # semana 1
 │   └── clasificacion_resenas_es_lstm_gru.ipynb
@@ -22,6 +24,8 @@ miaa-nlp/
 │   └── clasificacion_resenas_es_transformers.ipynb
 ├── Taller-s3/         # semana 3
 │   └── Proyecto_bert_resenas_amazon_colab_Experimentos.ipynb
+├── Taller-s5/         # semana 5
+│   └── asistente_codigo_transito_rag.ipynb
 └── README.md
 ```
 
@@ -118,12 +122,51 @@ los hiperparámetros, y solo cambia el checkpoint.
   métricas en JSON, las predicciones sobre prueba en CSV y la matriz de confusión de cada
   modelo. Los checkpoints intermedios se borran al terminar cada entrenamiento.
 
+### Taller-s5 — Asistente conversacional sobre el Código Nacional de Tránsito con RAG
+
+Chatbot que responde preguntas coloquiales sobre la Ley 769 de 2002 citando los artículos
+en los que se apoya. Combina recuperación con FAISS, re-ranking con un cross-encoder y un
+modelo generador servido localmente con Ollama, orquestados con LangChain y expuestos en
+una interfaz de Gradio.
+
+- **Cuaderno:** [Taller-s5/asistente_codigo_transito_rag.ipynb](Taller-s5/asistente_codigo_transito_rag.ipynb),
+  con la limpieza del corpus, el análisis exploratorio, los experimentos de recuperación, la
+  comparación de generadores, la calibración del umbral de abstención, la conversación con
+  memoria y el chatbot.
+- **Corpus:** texto consolidado de la ley en el Gestor Normativo de Función Pública, limpio
+  de versiones anteriores y notas de vigencia y jurisprudencia: 180 artículos, 176 vigentes y
+  28.501 palabras. Se guarda como snapshot en `data/ley_769_2002_articulos.jsonl`; la
+  descarga en vivo queda como respaldo.
+- **Evaluación:** 46 preguntas del código con su artículo correcto y una frase de evidencia,
+  más 6 preguntas externas (`data/preguntas_evaluacion_transito.csv`). Además de Recall@k y
+  MRR@10, se mide la **Evidencia@k**: si entre los k fragmentos hay uno que contiene la frase
+  que responde la pregunta.
+- **Comparación:** tres fragmentaciones (artículo completo, ventana de 100 palabras y
+  estructural), cuatro variantes de embeddings (`multilingual-e5-large` con y sin prefijos,
+  `multilingual-e5-base` y `bge-m3`), con y sin re-ranking (`bge-reranker-v2-m3`), y dos
+  generadores (`llama3.2:3b` y `gemma3:4b`).
+- **Resultado:** la mejor configuración es fragmentación estructural + `bge-m3` + re-ranking
+  con k = 3, que deja la evidencia entre los fragmentos recuperados en el 95,7 % de las
+  preguntas (100 % con k = 5). Con `gemma3:4b` y el umbral de abstención, el asistente cita
+  un artículo correcto en el 87,0 % de las preguntas del código, rechaza las 6 preguntas
+  externas y responde en unos 3 s en una T4.
+
+  | Hipótesis                              | Resultado               |
+  | -------------------------------------- | ----------------------- |
+  | H1. Fragmentación estructural          | Se cumple               |
+  | H2. Prefijos `query:`/`passage:` de E5 | No se cumple            |
+  | H3. Re-ranking mejora el MRR           | Se cumple               |
+  | H4. `gemma3:4b` cita mejor             | Se cumple               |
+  | H5. Umbral de abstención               | Se cumple, con reservas |
+
 ## Datos
 
 Los corpus **no se guardan en el repositorio**. Los cuadernos los descargan del Hub de
 Hugging Face con `load_dataset` en la primera ejecución y quedan en la caché local de la
 librería (`~/.cache/huggingface/datasets`); no hay que preparar nada a mano. La carpeta
-`data/` se reserva para archivos de apoyo pequeños y propios de cada taller.
+`data/` se reserva para archivos de apoyo pequeños y propios de cada taller. El cuaderno de
+la semana 5 lee de ahí el texto limpio de la Ley 769 de 2002 y su set de evaluación; si no
+los encuentra en local, los descarga de este repositorio en GitHub.
 
 ## Requisitos
 
@@ -141,10 +184,19 @@ primera celda instala versiones fijas de `transformers` (4.57.1), `datasets` (4.
 que reiniciar la sesión una vez. En CPU funciona, pero el entrenamiento de los tres modelos
 tarda mucho más.
 
+El cuaderno de la semana 5 está pensado para Google Colab con una GPU T4. Instala versiones
+fijas de LangChain, FAISS, `sentence-transformers`, `ollama` y Gradio, instala Ollama,
+arranca su servidor en segundo plano y descarga `llama3.2:3b` y `gemma3:4b`. Conviene
+empezar con un entorno de ejecución nuevo para que la GPU tenga memoria libre para los
+embeddings, el re-ranker y Ollama a la vez. Fuera de Colab hay que instalar Ollama a mano
+desde https://ollama.com/download.
+
 ## Ejecución
 
 Abrir la carpeta del taller correspondiente y ejecutar las celdas en orden. El cuaderno de
 la semana 1 entrena siete modelos, evalúa el mejor sobre la partición de prueba y levanta
 una demo en Gradio al final. El de la semana 2 entrena diecisiete modelos y sigue el mismo
 cierre. El de la semana 3 afina los tres modelos BERT uno tras otro, evalúa cada uno sobre la
-partición de prueba y termina con la tabla comparativa y el análisis de errores.
+partición de prueba y termina con la tabla comparativa y el análisis de errores. El de la
+semana 5 corre los 24 experimentos de recuperación, compara los dos generadores, calibra el
+umbral y levanta el chatbot en Gradio con un enlace público temporal (`share=True` en Colab).
