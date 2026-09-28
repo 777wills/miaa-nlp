@@ -24,6 +24,9 @@ miaa-nlp/
 │   └── clasificacion_resenas_es_transformers.ipynb
 ├── Taller-s3/         # semana 3
 │   └── Proyecto_bert_resenas_amazon_colab_Experimentos.ipynb
+├── Taller-S4/         # semana 4
+│   ├── Taller_4_GPT_GitHub_Issues.ipynb
+│   └── README_Taller_4_GPT_GitHub_Issues.md
 ├── Taller-s5/         # semana 5
 │   └── asistente_codigo_transito_rag.ipynb
 └── README.md
@@ -122,6 +125,42 @@ los hiperparámetros, y solo cambia el checkpoint.
   métricas en JSON, las predicciones sobre prueba en CSV y la matriz de confusión de cada
   modelo. Los checkpoints intermedios se borran al terminar cada entrenamiento.
 
+### Taller-S4 — Generación de incidencias de software con un GPT entrenado desde cero
+
+Modelo generativo tipo GPT que aprende a redactar issues de GitHub a partir de un título
+incompleto. A diferencia de las semanas anteriores, la tarea es generación autoregresiva:
+el modelo predice el siguiente token usando solo los anteriores.
+
+- **Cuaderno:** [Taller-S4/Taller_4_GPT_GitHub_Issues.ipynb](Taller-S4/Taller_4_GPT_GitHub_Issues.ipynb),
+  con la selección de issues, el EDA, la elección de la longitud de contexto, el
+  entrenamiento de dos configuraciones, la comparación de estrategias de decodificación y
+  una demo interactiva. El detalle está en
+  [Taller-S4/README_Taller_4_GPT_GitHub_Issues.md](Taller-S4/README_Taller_4_GPT_GitHub_Issues.md).
+- **Corpus:** [`noamaanMulla-03/datasets-issues`](https://huggingface.co/datasets/noamaanMulla-03/datasets-issues),
+  issues y pull requests del repositorio `huggingface/datasets`. Se conservan solo los issues
+  con título único: 3.276 documentos con el formato `<TITLE> título <BODY> descripción <eos>`,
+  divididos en 2.620, 327 y 329 para entrenamiento, validación y prueba.
+- **Modelos:** `GPT2LMHeadModel` inicializado desde cero sobre el tokenizador de GPT-2,
+  ampliado con `<TITLE>`, `<BODY>` y un token de relleno propio. Se comparan versiones de 2 y
+  4 capas (4 cabezas, embeddings de 128, contexto de 256 tokens), con un máximo de 10 épocas
+  y parada temprana con paciencia de 2.
+- **Resultado:** el modelo de 4 capas queda apenas por delante (68,69 de perplejidad en
+  validación frente a 69,69) y sobre la partición de prueba obtiene 4,0919 de pérdida y
+  59,85 de perplejidad. Ninguno activó la parada temprana. Las generaciones reproducen
+  vocabulario y plantillas del repositorio (`Describe the bug`, `Adding a Dataset`,
+  `load_dataset`), pero con repeticiones y palabras inventadas.
+
+  | Decodificación      | Distinct-1 | Distinct-2 |
+  | ------------------- | ---------- | ---------- |
+  | Greedy              | 0,481      | 0,577      |
+  | Temperatura 0,7     | 0,586      | 0,750      |
+  | Top-k 40            | 0,852      | 1,000      |
+  | Top-p 0,9           | 0,816      | 1,000      |
+  | Temperatura + top-k | 0,676      | 0,917      |
+
+- **Salidas:** `artifacts_taller4_gpt_github_issues/` con los pesos del modelo seleccionado y
+  el tokenizador.
+
 ### Taller-s5 — Asistente conversacional sobre el Código Nacional de Tránsito con RAG
 
 Chatbot que responde preguntas coloquiales sobre la Ley 769 de 2002 citando los artículos
@@ -184,6 +223,10 @@ primera celda instala versiones fijas de `transformers` (4.57.1), `datasets` (4.
 que reiniciar la sesión una vez. En CPU funciona, pero el entrenamiento de los tres modelos
 tarda mucho más.
 
+El cuaderno de la semana 4 instala sus dependencias en la primera celda y detecta el
+dispositivo disponible (CUDA, MPS o CPU). Se ejecutó con MPS en un equipo Apple Silicon,
+donde los dos entrenamientos tardan unos siete minutos en total.
+
 El cuaderno de la semana 5 está pensado para Google Colab con una GPU T4. Instala versiones
 fijas de LangChain, FAISS, `sentence-transformers`, `ollama` y Gradio, instala Ollama,
 arranca su servidor en segundo plano y descarga `llama3.2:3b` y `gemma3:4b`. Conviene
@@ -198,5 +241,8 @@ la semana 1 entrena siete modelos, evalúa el mejor sobre la partición de prueb
 una demo en Gradio al final. El de la semana 2 entrena diecisiete modelos y sigue el mismo
 cierre. El de la semana 3 afina los tres modelos BERT uno tras otro, evalúa cada uno sobre la
 partición de prueba y termina con la tabla comparativa y el análisis de errores. El de la
+semana 4 entrena los dos Mini-GPT, evalúa el mejor sobre la partición de prueba, compara
+cinco estrategias de decodificación y deja la función `demo_interactiva()` para probar un
+título propio. El de la
 semana 5 corre los 24 experimentos de recuperación, compara los dos generadores, calibra el
 umbral y levanta el chatbot en Gradio con un enlace público temporal (`share=True` en Colab).
