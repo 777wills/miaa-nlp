@@ -1,0 +1,14 @@
+# Entorno Windows 11 + Python 3.12, probado previamente con Gradio 5.50.0
+# Genera además requirements-lock.txt en tu entorno validado: python -m pip freeze > requirements-lock.txt
+pandas>=2.2,<3
+numpy>=1.26,<3
+faiss-cpu>=1.9,<2
+ollama>=0.5,<1
+mcp>=1.20,<2
+gradio==5.50.0
+datasets>=3,<5
+scikit-learn>=1.5,<2
+matplotlib>=3.8,<4
+jupyterlab>=4,<5
+ipykernel>=6,<8
+nbformat>=5,<6

@@ -29,6 +29,19 @@ miaa-nlp/
 │   └── README_Taller_4_GPT_GitHub_Issues.md
 ├── Taller-s5/         # semana 5
 │   └── asistente_codigo_transito_rag.ipynb
+├── Tallser-s6/        # semana 6
+│   ├── 01_Amazon_Review_Intelligence.ipynb
+│   └── Amazon_Review_Intelligence_Entrega/
+│       ├── 01_preparar_resenas.py        # muestra balanceada de 1.000 reseñas
+│       ├── 02_construir_indice.py        # embeddings + índice FAISS
+│       ├── 04_servidor_mcp_v3_2.py       # servidor MCP con dos herramientas
+│       ├── 07_app_gradio_v4_skills.py    # chat Gradio + Qwen3 + Skills
+│       ├── 08_gestor_skills.py           # carga, selección y auditoría de Skills
+│       ├── 09_probar_skills.py           # pruebas del gestor de Skills
+│       ├── requirements.txt
+│       └── skills/
+│           ├── analisis-voz-consumidor/SKILL.md
+│           └── auditoria-evidencia-rag/SKILL.md
 └── README.md
 ```
 
@@ -198,6 +211,57 @@ una interfaz de Gradio.
   | H4. `gemma3:4b` cita mejor             | Se cumple               |
   | H5. Umbral de abstención               | Se cumple, con reservas |
 
+### Taller-s6 — Amazon Review Intelligence: asistente sobre reseñas con MCP y Skills
+
+Asistente conversacional en español que responde preguntas sobre reseñas de Amazon:
+localiza testimonios relevantes, calcula cifras exactas e interpreta opiniones citando los
+IDs de las reseñas en que se apoya. Todo corre en local, sin servicios de inferencia en la
+nube.
+
+```
+Gradio → agente Python + Qwen3 → MCP → búsqueda FAISS o estadísticas con pandas → auditoría → respuesta con evidencia
+```
+
+- **Cuaderno:** [Tallser-s6/01_Amazon_Review_Intelligence.ipynb](Tallser-s6/01_Amazon_Review_Intelligence.ipynb),
+  que prepara el corpus y el índice si faltan, levanta y verifica el servidor MCP, carga las
+  Skills, ejecuta sus pruebas y abre el chat. Los scripts están en
+  [Tallser-s6/Amazon_Review_Intelligence_Entrega/](Tallser-s6/Amazon_Review_Intelligence_Entrega/).
+- **Corpus:** muestra balanceada de 1.000 reseñas de la partición `train` de
+  `SetFit/amazon_reviews_multi_es` (200 por calificación, semilla 42, sin IDs ni textos
+  repetidos), guardada en `data/resenas.csv`. Los porcentajes que calcula el asistente
+  describen solo esta muestra, no la distribución real de Amazon.
+- **Modelos:** `qwen3:4b-instruct-2507-q4_K_M` como generador (temperatura 0, contexto de
+  4.096 tokens) y `embeddinggemma:300m-qat-q4_0` para los embeddings (768 dimensiones),
+  ambos servidos con Ollama. El índice es un `IndexFlatIP` de FAISS sobre vectores
+  normalizados, es decir, similitud coseno.
+- **Herramientas MCP:** un servidor FastMCP sobre HTTP local (`127.0.0.1:8000/mcp`) publica
+  dos herramientas:
+
+  | Herramienta            | Qué hace                                                                                         |
+  | ---------------------- | ------------------------------------------------------------------------------------------------ |
+  | `buscar_resenas`       | Recupera hasta 8 reseñas por similitud semántica, con filtro opcional por estrellas.             |
+  | `estadisticas_resenas` | Cuenta reseñas con pandas por estrellas y palabra clave literal; devuelve porcentaje y promedio. |
+
+- **Skills:** dos procedimientos en `SKILL.md` que no son herramientas MCP adicionales.
+  `analisis-voz-consumidor` guía la interpretación de opiniones sin añadir detalles
+  ausentes y `auditoria-evidencia-rag` fija los controles de trazabilidad. El gestor
+  (`08_gestor_skills.py`) activa una, otra o ambas según la pregunta pida ejemplos o cifras,
+  y verifica de forma determinista que los IDs existan, que las citas coincidan con el CSV y
+  que los porcentajes respeten los filtros.
+- **Ajustes durante el desarrollo:** respuesta directa a saludos sin consultar FAISS,
+  separación entre filtrar por estrellas y pedir un conteo, corrección de argumentos mal
+  tipados por Qwen (`estrellas: 4` → `[4]`), resolución de referencias como «esa misma
+  reseña» a partir del historial y control de síntesis que contradicen un conteo de MCP.
+- **Límites:** solo 1.000 reseñas; la búsqueda semántica no garantiza cubrir todas las
+  opiniones; los documentos recuperados y las coincidencias literales no son el mismo
+  subconjunto; el historial resuelve referencias sencillas, no memoria general. Los
+  controles automáticos comprueban IDs, textos, calificaciones y aritmética, pero la
+  relevancia semántica y la calidad de las paráfrasis requieren revisión humana.
+- **Salidas:** `data/resenas.csv` y `data/origen.json` con la muestra y sus metadatos,
+  `vectorstore/resenas.faiss` y `vectorstore/config.json` con el índice, y
+  `mcp_servidor.log` cuando el servidor se lanza desde el cuaderno, todo dentro de
+  `Amazon_Review_Intelligence_Entrega/`.
+
 ## Datos
 
 Los corpus **no se guardan en el repositorio**. Los cuadernos los descargan del Hub de
@@ -234,6 +298,17 @@ empezar con un entorno de ejecución nuevo para que la GPU tenga memoria libre p
 embeddings, el re-ranker y Ollama a la vez. Fuera de Colab hay que instalar Ollama a mano
 desde https://ollama.com/download.
 
+El taller de la semana 6 se ejecuta en local (se desarrolló en Windows 11 con Python 3.12,
+una NVIDIA GTX 1660 SUPER de 6 GB y 8 GB de RAM) y tiene sus propias dependencias, con
+Gradio fijado en 5.50.0. Requiere Ollama en marcha en `127.0.0.1:11434` con los dos
+modelos descargados:
+
+```bash
+pip install -r Tallser-s6/Amazon_Review_Intelligence_Entrega/requirements.txt
+ollama pull qwen3:4b-instruct-2507-q4_K_M
+ollama pull embeddinggemma:300m-qat-q4_0
+```
+
 ## Ejecución
 
 Abrir la carpeta del taller correspondiente y ejecutar las celdas en orden. El cuaderno de
@@ -246,3 +321,17 @@ cinco estrategias de decodificación y deja la función `demo_interactiva()` par
 título propio. El de la
 semana 5 corre los 24 experimentos de recuperación, compara los dos generadores, calibra el
 umbral y levanta el chatbot en Gradio con un enlace público temporal (`share=True` en Colab).
+
+El cuaderno de la semana 6 toma como raíz el directorio de trabajo, así que debe ejecutarse
+con `Amazon_Review_Intelligence_Entrega/` como directorio actual. Reutiliza el corpus y el
+índice si ya existen, arranca el servidor MCP si el puerto 8000 está libre y abre el chat en
+http://127.0.0.1:7860. Sin el cuaderno, los scripts se lanzan en este orden:
+
+```bash
+cd Tallser-s6/Amazon_Review_Intelligence_Entrega
+python 01_preparar_resenas.py        # data/resenas.csv
+python 02_construir_indice.py        # vectorstore/resenas.faiss
+python 09_probar_skills.py           # pruebas del gestor; no necesita Ollama ni MCP
+python 04_servidor_mcp_v3_2.py       # dejar en marcha (puerto 8000)
+python 07_app_gradio_v4_skills.py    # en otra terminal (puerto 7860)
+```
